@@ -4,6 +4,10 @@ import * as React from 'react';
 
 const StackLayout = () => {
     return (
-        <Stack.Screen name="" />
+        <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
+        </Stack>
     )
-}
+};
+
+export default StackLayout;
