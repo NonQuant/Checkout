@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, Button } from "react-native";
 import { CameraView, Camera } from "expo-camera/next";
 
-const scan = () => {
+const ScannerView = ({ setBarcodeData }) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
@@ -17,6 +17,7 @@ const scan = () => {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
+    setBarcodeData(data);
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
 
@@ -26,7 +27,6 @@ const scan = () => {
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
-
   return (
     <View style={styles.container}>
       <CameraView
@@ -41,7 +41,7 @@ const scan = () => {
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -51,4 +51,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default scan
+export default ScannerView;
