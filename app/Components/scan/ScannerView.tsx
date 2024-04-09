@@ -18,7 +18,6 @@ const ScannerView = ({ setBarcodeData }) => {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setBarcodeData(data);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
 
   if (hasPermission === null) {

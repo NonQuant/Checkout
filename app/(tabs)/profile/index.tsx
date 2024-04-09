@@ -29,7 +29,7 @@ const ProfileScreen = () => {
       <TouchableOpacity
         style={[styles.profileElement, styles.profileButton]}
         onPress={() => {
-          console.log("You tapped the button!");
+          router.push("/receipts/");
         }}
       >
         <Text style={styles.profileButtonText}>Платежи</Text>
