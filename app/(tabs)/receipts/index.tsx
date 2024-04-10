@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import { View, Text, FlatList, StyleSheet, SectionList } from "react-native";
 import Transfer from "../../Interfaces/Transfer";
 import Section from "../../Interfaces/Section";
 
 const TransferHistory = () => {
-  const [transfers, setTransfers] = useState([]);
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
 
   useEffect(() => {
     // Simulate fetching transfer data from an API or local storage
@@ -16,7 +16,7 @@ const TransferHistory = () => {
     fetchData();
   }, []);
 
-  const formattedTransfers = React.useMemo(() => {
+  const formattedTransfers: Section[] = React.useMemo(() => {
     const groupedTransfers = transfers.reduce((acc, transfer) => {
       const date = transfer.date.split("T")[0]; // Extract date only (YYYY-MM-DD)
       if (!acc[date]) {
@@ -25,19 +25,21 @@ const TransferHistory = () => {
       acc[date].push(transfer);
       return acc;
     }, {});
+    console.log(groupedTransfers);
 
     // Convert object to array of sections with title and data
-    return Object.entries(groupedTransfers).map(([date, transfers]) => ({
-      title: date,
-      data: transfers,
-    }));
+    return Object.entries(groupedTransfers).map(
+      ([date, transfers]: [string, Transfer[]]) => ({
+        title: date,
+        data: transfers,
+      })
+    );
   }, [transfers]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: Transfer }) => (
     <View style={styles.listItem}>
-      <Text style={styles.listItemText}>From: {item.from}</Text>
-      <Text style={styles.listItemText}>To: {item.to}</Text>
-      <Text style={styles.listItemText}>Amount: {item.amount}</Text>
+      <Text style={styles.listItemText}>From: {item.senderName}</Text>
+      <Text style={styles.listItemText}>Amount: {item.transferAmount}</Text>
     </View>
   );
 
@@ -50,7 +52,7 @@ const TransferHistory = () => {
         renderSectionHeader={({ section }) => (
           <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
-        keyExtractor={(item) => item.id || item.title} // Use transfer ID or section title for key
+        keyExtractor={(item) => item.id} // Use transfer ID for key
       />
     </View>
   );
