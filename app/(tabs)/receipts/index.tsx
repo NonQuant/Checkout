@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, SectionList } from "react-native";
+import Transfer from "../../Interfaces/Transfer";
+import Section from "../../Interfaces/Section";
 
-type Transfer = {
-  id: string;
-  senderName: string;
-  transferAmount: number;
-  date: string;
-};
-
-const ReceiptsScreen = () => {
+const TransferHistory = () => {
   const [transfers, setTransfers] = useState([]);
 
   useEffect(() => {
@@ -21,21 +16,41 @@ const ReceiptsScreen = () => {
     fetchData();
   }, []);
 
+  const formattedTransfers = React.useMemo(() => {
+    const groupedTransfers = transfers.reduce((acc, transfer) => {
+      const date = transfer.date.split("T")[0]; // Extract date only (YYYY-MM-DD)
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(transfer);
+      return acc;
+    }, {});
+
+    // Convert object to array of sections with title and data
+    return Object.entries(groupedTransfers).map(([date, transfers]) => ({
+      title: date,
+      data: transfers,
+    }));
+  }, [transfers]);
+
   const renderItem = ({ item }) => (
     <View style={styles.listItem}>
-      <Text style={styles.listItemText}>From: {item.senderName}</Text>
-      <Text style={styles.listItemText}>Amount: {item.transferAmount} T</Text>
-      <Text style={styles.listItemText}>Date: {item.date}</Text>
+      <Text style={styles.listItemText}>From: {item.from}</Text>
+      <Text style={styles.listItemText}>To: {item.to}</Text>
+      <Text style={styles.listItemText}>Amount: {item.amount}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Transfer History</Text>
-      <FlatList
-        data={transfers}
+      <SectionList
+        sections={formattedTransfers}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        renderSectionHeader={({ section }) => (
+          <Text style={styles.sectionHeader}>{section.title}</Text>
+        )}
+        keyExtractor={(item) => item.id || item.title} // Use transfer ID or section title for key
       />
     </View>
   );
@@ -58,8 +73,11 @@ const styles = StyleSheet.create({
   listItemText: {
     fontSize: 16,
   },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
 });
 
-export default ReceiptsScreen;
-
-// const receiptsData: object | null = require("./data.json");
+export default TransferHistory;
