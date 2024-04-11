@@ -12,9 +12,18 @@ const TransferHistory = () => {
       const data: Transfer[] = require("./data.json");
       setTransfers(data);
     };
-    console.log(transfers);
     fetchData();
   }, []);
+
+  // Function to format date in desired format
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("default", { month: "long" }); // Get month name
+    const year = date.getFullYear();
+
+    return `${month} ${day}, ${year}`;
+  };
 
   const formattedTransfers: Section[] = React.useMemo(() => {
     const groupedTransfers = transfers.reduce((acc, transfer) => {
@@ -25,15 +34,24 @@ const TransferHistory = () => {
       acc[date].push(transfer);
       return acc;
     }, {});
-    console.log(groupedTransfers);
 
-    // Convert object to array of sections with title and data
-    return Object.entries(groupedTransfers).map(
+    const sections = Object.entries(groupedTransfers).map(
       ([date, transfers]: [string, Transfer[]]) => ({
-        title: date,
+        title: date, // Call formatDate function to format the date
         data: transfers,
       })
     );
+
+    sections.sort((a, b) => +new Date(a.title) - +new Date(b.title));
+
+    // return sections;
+
+    const formattedSections = sections.map((item) => ({
+      title: formatDate(item.title),
+      data: item.data,
+    }));
+
+    return formattedSections;
   }, [transfers]);
 
   const renderItem = ({ item }: { item: Transfer }) => (
@@ -45,7 +63,6 @@ const TransferHistory = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Transfer History</Text>
       <SectionList
         sections={formattedTransfers}
         renderItem={renderItem}
@@ -76,9 +93,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
     marginBottom: 5,
+    textAlign: "center",
+    padding: 5,
+    color: "rgb(180, 180, 180)",
   },
 });
 
