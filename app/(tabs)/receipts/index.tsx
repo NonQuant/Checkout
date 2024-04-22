@@ -56,8 +56,8 @@ const TransferHistory = () => {
 
   const renderItem = ({ item }: { item: Transfer }) => (
     <View style={styles.listItem}>
+      <Text style={styles.listItemText}>Transfer: {item.transferAmount}₸</Text>
       <Text style={styles.listItemText}>From: {item.senderName}</Text>
-      <Text style={styles.listItemText}>Amount: {item.transferAmount}</Text>
     </View>
   );
 
@@ -85,9 +85,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   listItem: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "white",
     padding: 10,
-    marginBottom: 5,
+    marginBottom: 10,
+    borderRadius: 12,
   },
   listItemText: {
     fontSize: 16,

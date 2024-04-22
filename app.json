@@ -5,9 +5,26 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
     "name": "Checkout",
-    "slug": "Checkout"
+    "slug": "Checkout",
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.test.checkout"
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.test.checkout"
+    }
   }
 }

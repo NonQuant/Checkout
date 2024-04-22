@@ -17,6 +17,7 @@ const Layout = () => {
             <Entypo name="home" size={24} color={color} />
           ),
           title: "Home",
+          tabBarActiveTintColor: "#41B06E",
         }}
       />
       <Tabs.Screen
@@ -30,6 +31,7 @@ const Layout = () => {
             />
           ),
           title: "Scan",
+          tabBarActiveTintColor: "#41B06E",
         }}
       />
       <Tabs.Screen
@@ -39,6 +41,7 @@ const Layout = () => {
             <Ionicons name="receipt-outline" size={24} color={color} />
           ),
           title: "Receipts",
+          tabBarActiveTintColor: "#41B06E",
         }}
       />
       <Tabs.Screen
@@ -48,6 +51,7 @@ const Layout = () => {
             <Feather name="user" size={24} color={color} />
           ),
           title: "Profile",
+          tabBarActiveTintColor: "#41B06E",
         }}
       />
     </Tabs>
