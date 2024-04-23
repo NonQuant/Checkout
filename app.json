@@ -14,7 +14,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "@react-native-firebase/auth"
     ],
     "name": "Checkout",
     "slug": "Checkout",
@@ -25,6 +26,14 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "package": "com.test.checkout"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "62d9fb4e-683f-424c-88dd-ae51ede9d124"
+      }
     }
   }
 }
