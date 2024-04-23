@@ -22,6 +22,15 @@ const RegisterSeller = () => {
 
   useEffect(() => {}, []);
 
+  const handleCodeChange = (code: string) => {
+    setCode(code);
+    if (code.length === 4) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  };
+
   return (
     <Pressable style={styles.contentView} onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.contentView}>
@@ -31,9 +40,13 @@ const RegisterSeller = () => {
           </View>
           <View style={styles.mainContent}>
             <Text style={styles.labelText}>Введенный номер: {phoneNumber}</Text>
+            <Text style={styles.labelText}>Введите код:</Text>
             <TextInput
-            value={code}
-            onChangeText={setCode}
+              style={styles.codeInput}
+              value={code}
+              onChangeText={handleCodeChange}
+              maxLength={4}
+              keyboardType="number-pad"
             />
           </View>
           <CTAButton
@@ -65,7 +78,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 50,
     backgroundColor: "white",
     paddingTop: 20,
-    // maxHeight: "90%",
   },
   titleContainer: {
     flex: 1.2,
@@ -83,10 +95,19 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 6,
+    alignItems: "center",
+    gap: 40,
   },
   labelText: {
     fontSize: 24,
     marginBottom: 10,
+  },
+  codeInput: {
+    borderWidth: 1,
+    borderColor: "black",
+    width: 110,
+    fontSize: 40,
+    padding: 5,
   },
 });
 
