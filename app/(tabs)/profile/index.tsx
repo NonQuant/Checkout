@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import React from "react";
 import { router } from "expo-router";
+import auth from "@react-native-firebase/auth";
 
 const ProfileScreen = () => {
   // Sample of one user data
@@ -51,6 +52,16 @@ const ProfileScreen = () => {
         }}
       >
         <Text style={styles.profileButtonText}>О нас</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.profileElement, styles.profileButton]}
+        onPress={() => {
+          auth()
+            .signOut()
+            .then(() => router.replace("/"));
+        }}
+      >
+        <Text style={styles.profileButtonText}>Выход</Text>
       </TouchableOpacity>
     </View>
   );

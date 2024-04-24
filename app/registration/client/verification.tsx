@@ -12,19 +12,64 @@ import {
 import { CTAButton } from "../../Components/Buttons/CTAButton";
 import { router, useLocalSearchParams } from "expo-router";
 import { FormInput } from "../../Components/Inputs/FormInput";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 
 const RegisterSeller = () => {
   const GLOBAL = require("./global");
   const phoneNumber = GLOBAL.phoneNumber;
-  const [code, setCode] = useState("");
-  const [verificationId, setVerificationId] = useState(null);
+  const [code, setCode] = useState(""); // verification code (OTP - One-Time-Passcode)
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [confirm, setConfirm] = useState(null); // If null, no SMS has been sent
 
-  useEffect(() => {}, []);
+  async function redirectUser(user) {
+    try {
+      if (user?.displayName) {
+        router.navigate({ pathname: "/home", params: { user: user } });
+      } else {
+        router.navigate({
+          pathname: "/registration/client/userInfoSetup",
+          params: { user: user },
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function onAuthStateChanged(user) {
+    redirectUser(user);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  async function signInWithPhoneNumber(phoneNumber) {
+    try {
+      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setConfirm(confirmation);
+    } catch (error) {
+      console.error("Error sending code", error);
+    }
+  }
+
+  async function confirmCode() {
+    try {
+      const userCredential = await confirm.confirm(code);
+      const user = userCredential.user;
+
+      redirectUser(user);
+    } catch (error) {
+      console.error("Invalid code", error);
+      Alert.alert("Invalid code");
+    }
+  }
 
   const handleCodeChange = (code: string) => {
     setCode(code);
-    if (code.length === 4) {
+    if (code.length === 6) {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
@@ -45,16 +90,29 @@ const RegisterSeller = () => {
               style={styles.codeInput}
               value={code}
               onChangeText={handleCodeChange}
-              maxLength={4}
+              maxLength={6}
               keyboardType="number-pad"
             />
           </View>
-          <CTAButton
-            title="Продолжить"
-            onPress={() => {}}
-            variant="primary"
-            disabled={buttonDisabled}
-          />
+          {confirm ? (
+            <CTAButton
+              title="Продолжить"
+              onPress={() => {
+                confirmCode();
+              }}
+              variant="primary"
+              disabled={buttonDisabled}
+            />
+          ) : (
+            <CTAButton
+              title="Отправить код"
+              onPress={() => {
+                signInWithPhoneNumber(phoneNumber);
+              }}
+              variant="primary"
+              disabled={false}
+            />
+          )}
           <CTAButton
             title="Назад"
             onPress={() => {
@@ -84,7 +142,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    marginBottom: 150,
+    marginBottom: 50,
   },
   titleText: {
     flex: 1,
@@ -105,7 +163,7 @@ const styles = StyleSheet.create({
   codeInput: {
     borderWidth: 1,
     borderColor: "black",
-    width: 110,
+    width: 160,
     fontSize: 40,
     padding: 5,
   },
