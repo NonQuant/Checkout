@@ -16,7 +16,7 @@ import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
 const RegisterSeller = () => {
-  const GLOBAL = require("./global");
+  const GLOBAL = require("./../../global");
   const phoneNumber = GLOBAL.phoneNumber;
   const [code, setCode] = useState(""); // verification code (OTP - One-Time-Passcode)
   const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -25,12 +25,9 @@ const RegisterSeller = () => {
   async function redirectUser(user) {
     try {
       if (user?.displayName) {
-        router.navigate({ pathname: "/home", params: { user: user } });
+        router.navigate("/home");
       } else {
-        router.navigate({
-          pathname: "/registration/client/userInfoSetup",
-          params: { user: user },
-        });
+        router.navigate("/registration/client/userInfoSetup");
       }
     } catch (error) {
       console.error(error);
@@ -38,7 +35,9 @@ const RegisterSeller = () => {
   }
 
   async function onAuthStateChanged(user) {
-    redirectUser(user);
+    if (user) {
+      redirectUser(user);
+    }
   }
 
   useEffect(() => {

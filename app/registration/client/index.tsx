@@ -13,7 +13,7 @@ import { FormInput } from "../../Components/Inputs/FormInput";
 
 const RegisterSeller = () => {
   const [phone, setPhone] = useState<string | undefined>();
-  const GLOBAL = require("./global");
+  const GLOBAL = require("../../global");
 
   return (
     <Pressable style={styles.contentView} onPress={Keyboard.dismiss}>

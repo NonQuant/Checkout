@@ -14,6 +14,7 @@ import { Redirect, router } from "expo-router";
 import auth from "@react-native-firebase/auth";
 
 const MainScreen = () => {
+  const GLOBAL = require("./global");
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
