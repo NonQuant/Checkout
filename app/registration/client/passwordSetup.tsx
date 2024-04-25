@@ -12,14 +12,15 @@ import {
 import { CTAButton } from "../../Components/Buttons/CTAButton";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
 import { FormInput } from "../../Components/Inputs/FormInput";
+import { MessageView } from "../../Components/Views/MessageView";
 
 const passwordSetup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const user = auth().currentUser;
@@ -34,6 +35,48 @@ const passwordSetup = () => {
       );
   };
 
+  const linkWithEmailAndPassword = async (
+    email,
+    password,
+    confirmationResult
+  ) => {
+    const credential = auth.EmailAuthProvider.credential(email, password);
+    try {
+      await confirmationResult.user.linkWithCredential(credential);
+      console.log("User account linked successfully");
+      // User now has phone number and email/password for sign-in
+    } catch (error) {
+      console.error(error);
+      // Handle errors appropriately
+    }
+  };
+
+  const enableButtonOnChange = (text1, text2, text3) => {
+    console.log(text1 && text2 && text3);
+    console.log(text1, text2, text3);
+    if (text1 && text2 && text3) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (!validateEmail(email)) {
+      setErrorMessage("Неверный формат эл. почты!!!");
+      return;
+    }
+    if (password.length < 8) {
+      setErrorMessage("Пароль не должен быть короче 8 символов!!!");
+      return;
+    }
+    if (password != passwordRepeat) {
+      setErrorMessage("Пароли не совпадают!!!");
+      return;
+    }
+    console.log("Success!");
+  };
+
   return (
     <Pressable style={styles.contentView} onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.contentView}>
@@ -46,26 +89,34 @@ const passwordSetup = () => {
               placeholder="Email"
               variant="email"
               value={email}
-              onChangeText={() => {}}
+              onChangeText={(text) => {
+                setEmail(text);
+                enableButtonOnChange(text, password, passwordRepeat);
+              }}
             />
             <FormInput
               placeholder="Пароль"
               variant="password"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                enableButtonOnChange(email, text, passwordRepeat);
+              }}
             />
             <FormInput
               placeholder="Повторите пароль"
               variant="password"
               value={passwordRepeat}
-              onChangeText={setPasswordRepeat}
+              onChangeText={(text) => {
+                setPasswordRepeat(text);
+                enableButtonOnChange(email, password, text);
+              }}
             />
+            {errorMessage && <MessageView text={errorMessage} type="error" />}
           </View>
           <CTAButton
             title="Продолжить"
-            onPress={() => {
-              console.log("Pressed");
-            }}
+            onPress={handleButtonClick}
             variant="primary"
             disabled={buttonDisabled}
           />

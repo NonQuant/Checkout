@@ -24,18 +24,23 @@ const RegisterSeller = () => {
 
   async function redirectUser(user) {
     try {
-      if (user?.displayName) {
-        router.navigate("/home");
-      } else {
-        router.navigate("/registration/client/userInfoSetup");
-      }
+      router.navigate("/registration/client/userInfoSetup");
+      // const userDocument = await firestore()
+      //   .collection("users")
+      //   .doc(user.uid)
+      //   .get();
+      // if (userDocument.exists && userDocument.get("firstName")) {
+      //   router.navigate("/home");
+      // } else {
+      //   router.navigate("/registration/client/userInfoSetup");
+      // }
     } catch (error) {
       console.error(error);
     }
   }
 
   async function onAuthStateChanged(user) {
-    if (user) {
+    if (user && user.phoneNumber === phoneNumber) {
       redirectUser(user);
     }
   }
