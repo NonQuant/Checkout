@@ -34,6 +34,7 @@ const userInfoSetup = () => {
         middleName,
         lastName,
       });
+      router.replace("home");
     } catch (error) {
       console.error("Error saving details: ", error);
     }

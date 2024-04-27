@@ -21,6 +21,7 @@ export const FormInput: FC<FormInputProps> = ({
 
   const secureTextEntry = variant === "password";
   const autoComplete = variant === "phone" ? "tel" : "off";
+  const autoCapitalize = variant === "text" ? "sentences" : "none";
   const style =
     variant === "phone" ? styles.loginPhoneField : styles.loginTextField;
 
@@ -34,6 +35,7 @@ export const FormInput: FC<FormInputProps> = ({
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
       autoComplete={autoComplete}
+      autoCapitalize={autoCapitalize}
     />
   );
 };

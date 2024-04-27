@@ -6,24 +6,43 @@ import {
   Image,
   StyleSheet,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 
 const ProfileScreen = () => {
-  // Sample of one user data
-  const user = {
-    Name: "Altynai",
-    Surname: "Isskendir",
-    UserID: 10020,
-  };
+  const [userDocument, setUserDocument] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth().currentUser;
+      console.log(user);
+      if (user) {
+        const userDoc = await firestore()
+          .collection("users")
+          .doc(user.uid)
+          .get();
+        setUserDocument(userDoc);
+      } else {
+        router.replace("/");
+      }
+    };
+
+    fetchUserData().catch((error) => {
+      console.error(error);
+      auth().signOut();
+      router.replace("/");
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={[styles.profileElement]}>
         <Image />
         <Text style={styles.profileName}>
-          {user.Name} {user.Surname[0]}.
+          {userDocument && userDocument.get("firstName")}{" "}
+          {userDocument && userDocument.get("lastName")[0] + "."}
         </Text>
       </View>
 

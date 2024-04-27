@@ -8,32 +8,36 @@ import {
   Keyboard,
   Alert,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { CTAButton } from "../../Components/Buttons/CTAButton";
 import { router, useLocalSearchParams } from "expo-router";
 import { FormInput } from "../../Components/Inputs/FormInput";
-import auth from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
+import { MessageView } from "../../Components/Views/MessageView";
 
 const RegisterSeller = () => {
   const GLOBAL = require("./../../global");
   const phoneNumber = GLOBAL.phoneNumber;
-  const [code, setCode] = useState(""); // verification code (OTP - One-Time-Passcode)
   const [buttonDisabled, setButtonDisabled] = useState(true);
-  const [confirm, setConfirm] = useState(null); // If null, no SMS has been sent
+  const [verificationCode, setVerificationCode] = useState("");
+  const [confirmationResult, setConfirmationResult] =
+    useState<FirebaseAuthTypes.ConfirmationResult>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function redirectUser(user) {
     try {
-      router.navigate("/registration/client/userInfoSetup");
-      // const userDocument = await firestore()
-      //   .collection("users")
-      //   .doc(user.uid)
-      //   .get();
-      // if (userDocument.exists && userDocument.get("firstName")) {
-      //   router.navigate("/home");
-      // } else {
-      //   router.navigate("/registration/client/userInfoSetup");
-      // }
+      const userDocument = await firestore()
+        .collection("users")
+        .doc(user.uid)
+        .get();
+      if (userDocument.exists && userDocument.get("firstName")) {
+        router.navigate("/home");
+      } else {
+        router.navigate("/registration/client/userInfoSetup");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -50,33 +54,72 @@ const RegisterSeller = () => {
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  async function signInWithPhoneNumber(phoneNumber) {
-    try {
-      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      setConfirm(confirmation);
-    } catch (error) {
-      console.error("Error sending code", error);
-    }
-  }
-
-  async function confirmCode() {
-    try {
-      const userCredential = await confirm.confirm(code);
-      const user = userCredential.user;
-
-      redirectUser(user);
-    } catch (error) {
-      console.error("Invalid code", error);
-      Alert.alert("Invalid code");
-    }
-  }
-
   const handleCodeChange = (code: string) => {
-    setCode(code);
+    setVerificationCode(code);
     if (code.length === 6) {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
+    }
+  };
+
+  const sendVerificationCode = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const formattedPhoneNumber = `+${phoneNumber.replace(/\D/g, "")}`; // Format phone number with country code
+      const confirmationResult = await auth().signInWithPhoneNumber(
+        formattedPhoneNumber
+      );
+      setConfirmationResult(confirmationResult);
+    } catch (error) {
+      console.error("Error sending verification code:", error);
+      setErrorMessage(error.message); // Display a user-friendly error message
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      await linkPhoneNumber();
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      setErrorMessage(error.message); // Display a user-friendly error message
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const linkPhoneNumber = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    const user = auth().currentUser;
+
+    if (user && user.uid) {
+      // Check if user is authenticated
+      try {
+        const credential = auth.PhoneAuthProvider.credential(
+          confirmationResult.verificationId,
+          verificationCode
+        );
+        await user.linkWithCredential(credential);
+        console.log("Phone number successfully linked to user");
+        redirectUser(user);
+      } catch (error) {
+        console.error("Error linking phone number:", error);
+        setErrorMessage(error.message); // Display user-friendly error message
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.error("User is not authenticated");
+      setErrorMessage("An error occurred. Please try again."); // Inform user about authentication issue
     }
   };
 
@@ -92,29 +135,27 @@ const RegisterSeller = () => {
             <Text style={styles.labelText}>Введите код:</Text>
             <TextInput
               style={styles.codeInput}
-              value={code}
+              value={verificationCode}
               onChangeText={handleCodeChange}
               maxLength={6}
               keyboardType="number-pad"
             />
+            {errorMessage && <MessageView text={errorMessage} type="error" />}
           </View>
-          {confirm ? (
+          {loading && <ActivityIndicator size="large" />}
+          {confirmationResult ? (
             <CTAButton
               title="Продолжить"
-              onPress={() => {
-                confirmCode();
-              }}
+              onPress={verifyCode}
               variant="primary"
-              disabled={buttonDisabled}
+              disabled={buttonDisabled || loading}
             />
           ) : (
             <CTAButton
               title="Отправить код"
-              onPress={() => {
-                signInWithPhoneNumber(phoneNumber);
-              }}
+              onPress={sendVerificationCode}
               variant="primary"
-              disabled={false}
+              disabled={loading}
             />
           )}
           <CTAButton

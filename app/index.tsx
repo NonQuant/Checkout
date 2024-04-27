@@ -32,7 +32,7 @@ const MainScreen = () => {
 
   if (initializing) return null;
 
-  if (user && user?.displayName) {
+  if (user) {
     return <Redirect href="/home" />;
   }
 
