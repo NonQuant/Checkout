@@ -8,6 +8,7 @@ import {
   Pressable,
   Keyboard,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { CTAButton } from "../../Components/Buttons/CTAButton";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
@@ -21,6 +22,7 @@ const passwordSetup = () => {
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const user = auth().currentUser;
@@ -28,6 +30,7 @@ const passwordSetup = () => {
   }, []);
 
   const signIn = () => {
+    setLoading(true);
     auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
@@ -43,6 +46,9 @@ const passwordSetup = () => {
           console.log("That email address is invalid!");
         }
         console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -63,16 +69,20 @@ const passwordSetup = () => {
   };
 
   const handleButtonClick = () => {
+    setLoading(true);
     if (!validateEmail(email)) {
       setErrorMessage("Неверный формат эл. почты!!!");
+      setLoading(false);
       return;
     }
     if (password.length < 8) {
       setErrorMessage("Пароль не должен быть короче 8 символов!!!");
+      setLoading(false);
       return;
     }
     if (password != passwordRepeat) {
       setErrorMessage("Пароли не совпадают!!!");
+      setLoading(false);
       return;
     }
     signIn();
@@ -115,6 +125,7 @@ const passwordSetup = () => {
             />
             {errorMessage && <MessageView text={errorMessage} type="error" />}
           </View>
+          {loading && <ActivityIndicator size="large" />}
           <CTAButton
             title="Продолжить"
             onPress={handleButtonClick}

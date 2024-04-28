@@ -58,6 +58,13 @@ const MainScreen = () => {
               }}
               variant="primary"
             />
+            <CTAButton
+              title="Вход"
+              onPress={() => {
+                router.navigate("/login");
+              }}
+              variant="secondary"
+            />
           </View>
         </View>
       </SafeAreaView>
